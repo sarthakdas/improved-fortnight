@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -48,7 +48,7 @@ eigen = "eigen_robotics.cli:main_wrapper"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["improved_fortnight*"]
+include = ["eigen_robotics*"]
 
 [tool.black]
 line-length = 88
