@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Example usage of the improved-fortnight package.
+Example usage of the eigen_roboticspython -m pip install --upgrade build twine package.
 """
 
-from improved_fortnight import greet, calculate, __version__
+from eigen_robotics import greet, calculate, __version__
 
 
 def main():
     """Demonstrate the package functionality."""
-    print(f"improved-fortnight v{__version__}")
+    print(f"eigen_robotics v{__version__}")
     print("=" * 40)
     
     # Demonstrate greet function

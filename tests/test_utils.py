@@ -3,7 +3,7 @@ Tests for the utils module.
 """
 
 import pytest
-from improved_fortnight.utils import greet, calculate
+from eigen_robotics.utils import greet, calculate
 
 
 class TestGreet:

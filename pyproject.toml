@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "improved-fortnight"
+name = "eigen-robotics"
 version = "0.1.0"
 description = "A simple dummy Python package template"
 readme = "README.md"

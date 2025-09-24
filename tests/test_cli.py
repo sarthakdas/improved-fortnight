@@ -3,7 +3,7 @@ Tests for the CLI module.
 """
 
 import pytest
-from improved_fortnight.cli import main
+from eigen_robotics.cli import main
 
 
 class TestCLI:
