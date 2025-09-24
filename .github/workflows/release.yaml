@@ -8,6 +8,7 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
       - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
   workflow_dispatch:   # manual run button in Actions tab
+
 env:
   PACKAGE_NAME: "eigen-robotics"
   OWNER: "sarthakdas"
@@ -20,15 +21,15 @@ jobs:
       suffix: ${{ steps.release.outputs.suffix }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Extract tag and Details
         id: release
-        run: |
+        run:
           if [ "${{ github.ref_type }}" = "tag" ]; then
             TAG_NAME=${GITHUB_REF#refs/tags/}
-            NEW_VERSION=$(echo $TAG_NAME | awk -F'-' '{print $1}')
-            SUFFIX=$(echo $TAG_NAME | grep -oP '[a-z]+[0-9]+' || echo "")
+            NEW_VERSION=$(echo "$TAG_NAME" | awk -F'-' '{print $1}')
+            SUFFIX=$(echo "$TAG_NAME" | grep -oP '[a-z]+[0-9]+' || echo "")
             echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
             echo "suffix=$SUFFIX" >> "$GITHUB_OUTPUT"
             echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
@@ -45,9 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch information from PyPI
-        run: |
+        run:
           response=$(curl -s https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "{}")
-          latest_previous_version=$(echo $response | jq --raw-output "select(.releases != null) | .releases | keys_unsorted | last")
+          latest_previous_version=$(echo "$response" | jq --raw-output "select(.releases != null) | .releases | keys_unsorted | last")
           if [ -z "$latest_previous_version" ]; then
             echo "Package not found on PyPI."
             latest_previous_version="0.0.0"
@@ -56,10 +57,10 @@ jobs:
           echo "latest_previous_version=$latest_previous_version" >> $GITHUB_ENV
 
       - name: Compare versions and exit if not newer
-        run: |
+        run:
           NEW_VERSION=${{ needs.details.outputs.new_version }}
           LATEST_VERSION=$latest_previous_version
-          if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | sort -rV | head -n 1)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" == "$LATEST_VERSION" ]; then
+          if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | sort -rV | head -n 1)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" = "$LATEST_VERSION" ]; then
             echo "The new version $NEW_VERSION is not greater than the latest version $LATEST_VERSION on PyPI."
             exit 1
           else
@@ -70,27 +71,27 @@ jobs:
     needs: [details, check_pypi]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install Poetry
-        run: |
+        run:
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Set project version with Poetry
-        run: |
+        run:
           poetry version ${{ needs.details.outputs.new_version }}
 
       - name: Install dependencies
         run: poetry install --sync --no-interaction
 
       - name: Build source and wheel distribution
-        run: |
+        run:
           poetry build
 
       - name: Upload artifacts
@@ -107,9 +108,10 @@ jobs:
       name: release
     permissions:
       id-token: write
+      contents: read
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
@@ -125,12 +127,12 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
@@ -140,7 +142,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run:
-          gh release create ${{ needs.details.outputs.tag_name }} dist/* --title ${{ needs.details.outputs.tag_name }} --generate-notes
+          gh release create ${{ needs.details.outputs.tag_name }} dist/* \
+            --title ${{ needs.details.outputs.tag_name }} \
+            --generate-notes
 
   bump_homebrew_formula:
     name: Dispatch event to Repo B
@@ -150,12 +154,12 @@ jobs:
       name: release
     steps:
       - name: Dispatch Repository Dispatch event
-        uses: peter-evans/repository-dispatch@v2
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.BREW_TAP_TOKEN }}
           repository: ${{ env.OWNER }}/{{ env.TAP_NAME }}
           event-type: "update-formula"
-          client-payload: |-
+          client-payload:
             { 
               "formula_version": "${{env.FORMULA_VERSION}}", 
               "formula_url": "${{ env.FORMULA_URL }}", 
