@@ -4,7 +4,7 @@ A simple dummy Python package.
 This package provides basic utility functions as a template example.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.1.1"
 __author__ = "Your Name"
 __email__ = "your.email@example.com"
 
