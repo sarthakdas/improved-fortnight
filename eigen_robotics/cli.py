@@ -1,75 +1,69 @@
 """
-Command-line interface for the improved-fortnight package.
+Command-line interface for the eigen_robotics package.
 """
 
-import argparse
 import sys
-from typing import List, Optional
+from typing import Optional
+
+import typer
 
 from . import __version__, greet, calculate
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+app = typer.Typer(help="A simple dummy Python package for eigen robotics")
+
+
+def version_callback(value: bool):
+    if value:
+        typer.echo(f"eigen {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: Optional[bool] = typer.Option(
+        None, "--version", callback=version_callback, help="Show version and exit"
+    )
+):
     """
-    Main entry point for the CLI.
-    
-    Args:
-        argv: Command line arguments. If None, uses sys.argv.
-        
-    Returns:
-        int: Exit code (0 for success, non-zero for error).
+    Main entry point for the eigen CLI.
     """
-    if argv is None:
-        argv = sys.argv[1:]
-    
-    parser = argparse.ArgumentParser(
-        description="A simple dummy Python package",
-        prog="improved-fortnight"
+    pass
+
+
+@app.command("greet")
+def greet_cmd(name: str = typer.Argument("World", help="Name to greet")):
+    """Generate a greeting."""
+    result = greet(name)
+    typer.echo(result)
+
+
+@app.command("calc")
+def calc_cmd(
+    x: float = typer.Argument(..., help="First number"),
+    y: float = typer.Argument(..., help="Second number"),
+    operation: str = typer.Argument(
+        ..., help="Operation to perform (add, subtract, multiply, divide)"
     )
-    parser.add_argument(
-        "--version", 
-        action="version", 
-        version=f"%(prog)s {__version__}"
-    )
+):
+    """Perform calculations."""
+    valid_operations = ["add", "subtract", "multiply", "divide"]
+    if operation not in valid_operations:
+        typer.echo(f"Error: Invalid operation. Choose from: {', '.join(valid_operations)}", err=True)
+        raise typer.Exit(1)
     
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
-    
-    # Greet command
-    greet_parser = subparsers.add_parser("greet", help="Generate a greeting")
-    greet_parser.add_argument(
-        "name", 
-        nargs="?", 
-        default="World", 
-        help="Name to greet (default: World)"
-    )
-    
-    # Calculate command
-    calc_parser = subparsers.add_parser("calc", help="Perform calculations")
-    calc_parser.add_argument("x", type=float, help="First number")
-    calc_parser.add_argument("y", type=float, help="Second number")
-    calc_parser.add_argument(
-        "operation", 
-        choices=["add", "subtract", "multiply", "divide"],
-        help="Operation to perform"
-    )
-    
-    args = parser.parse_args(argv)
-    
-    if args.command == "greet":
-        print(greet(args.name))
-        return 0
-    elif args.command == "calc":
-        try:
-            result = calculate(args.x, args.y, args.operation)
-            print(f"Result: {result}")
-            return 0
-        except ValueError as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return 1
-    else:
-        parser.print_help()
-        return 1
+    try:
+        result = calculate(x, y, operation)
+        typer.echo(f"Result: {result}")
+    except ValueError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1)
+
+
+def main_wrapper():
+    """Wrapper function for the CLI entry point."""
+    return app()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    app()

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eigen-robotics"
-version = "0.1.0"
+version = "0.2.0"
 description = "A simple dummy Python package template"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -27,7 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+dependencies = ["typer>=0.9.0"]
 
 [project.optional-dependencies]
 dev = [
@@ -44,7 +44,7 @@ Repository = "https://github.com/sarthakdas/improved-fortnight"
 Issues = "https://github.com/sarthakdas/improved-fortnight/issues"
 
 [project.scripts]
-improved-fortnight = "improved_fortnight.cli:main"
+eigen = "eigen_robotics.cli:main_wrapper"
 
 [tool.setuptools.packages.find]
 where = ["."]
