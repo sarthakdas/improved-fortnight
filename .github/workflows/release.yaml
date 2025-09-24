@@ -119,7 +119,7 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-          uses: actions/checkout@v4
+          uses: actions/checkout@v3
     runs-on: ubuntu-latest
     permissions:
       contents: write
